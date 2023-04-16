@@ -1,3 +1,4 @@
+# Прочие отображаемые объекты
 from itertools import combinations
 
 import matplotlib
@@ -52,17 +53,17 @@ class GraphWidget(QWidget):
         nx.draw_networkx_labels(self.G, self.pos, font_size=15, font_color='w', font_family='Arial', ax=self.ax)
         self.canvas.draw_idle()
         self.fig.tight_layout()
-
+    def clear_fig(self):
+        self.ax.clear()
+        self.ax.axis('off')
+        self.fig.tight_layout()
     # Очистка графа
     def clear_graph(self):
         self.G.clear()
         self.pos.clear()
-        self.canvas.draw_idle()
         self.vertex_count = 0
         self.selected_vertex = None
-        self.ax.clear()
-        self.ax.axis('off')
-        self.fig.tight_layout()
+        self.clear_fig()
         self.update_graph()
 
 # Класс редактируемого отображаемого графа
@@ -89,8 +90,8 @@ class GraphWidgetEditable(GraphWidget):
         self.update_graph()
 
     # Очистка графа с настройкой осей
-    def clear_graph(self):
-        super().clear_graph()
+    def clear_fig(self):
+        super().clear_fig()
         self.ax.set_xlim(-10, 10)
         self.ax.set_ylim(-10, 10)
         self.fig.tight_layout()

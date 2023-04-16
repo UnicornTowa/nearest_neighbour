@@ -1,4 +1,6 @@
 # Общие объекты и методы
+
+import networkx as nx
 from PyQt5.QtCore import QEvent
 from PyQt5.QtGui import QIcon, QFont, QIntValidator
 from PyQt5.QtWidgets import QMessageBox
@@ -19,6 +21,21 @@ class NewVertex(QEvent):
     def __init__(self, vertex):
         QEvent.__init__(self, NewVertex.Type)
         self.vertex = vertex
+
+# Печатает путь для заданного графа
+def get_path(graph: nx.DiGraph, start):
+    start_v = new_v = start
+    path = str(start_v)
+    if len(graph.edges) != len(graph.nodes):
+        return 'No solution found'
+    for _ in range(len(graph.edges)):
+        new_v = list(graph.out_edges(new_v))
+        if new_v:
+            new_v = new_v[0][1]
+            path += ' -> ' + str(new_v)
+        else:
+            return 'No solution found'
+    return path
 
 # Сообщение об ошибке
 def input_error(text):
