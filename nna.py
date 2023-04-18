@@ -1,8 +1,7 @@
-# Алгоритм ближайшего соседа
-from copy import deepcopy
-
+# Алгоритмы
 import networkx as nx
 
+# Алгоритм ближайшего соседа
 def nna(graph:nx.Graph, start_v):
     # Определяем объекты, которые будем возвращать
     out_graph = nx.DiGraph()
@@ -52,11 +51,12 @@ def nna(graph:nx.Graph, start_v):
             return out_graph, 0
     return out_graph, path_len
 
+# Оптимизация простых петель
 def two_opt(graph: nx.Graph, res_graph: nx.DiGraph):
-    improve = 0
-    for edge in deepcopy(res_graph.edges(data=True)):
+    # Перебираем все ребра выходного графа
+    for edge in res_graph.edges(data=True):
         b_c = edge
-
+        # Определяем точки A, B, C, D если ребра существуют
         a_edges = list(res_graph.in_edges(b_c[0], data=True))
         d_edges = list(res_graph.out_edges(b_c[1], data=True))
         if a_edges and d_edges:
@@ -68,14 +68,13 @@ def two_opt(graph: nx.Graph, res_graph: nx.DiGraph):
             d = c_d[1]
         else:
             continue
-        if graph.has_edge(a, c) and graph.has_edge(b, d):
-            a_c_len = graph.edges[a, c]['weight']
-            b_d_len = graph.edges[b, d]['weight']
-        else:
+        if not graph.has_edge(a, c) or not graph.has_edge(b, d):
             continue
+        a_c_len = graph.edges[a, c]['weight']
+        b_d_len = graph.edges[b, d]['weight']
         old_weight = a_b[2]['weight'] + c_d[2]['weight']
         new_weight = a_c_len + b_d_len
-
+        # Проверяем есть ли улучшение, если есть - изменяем решение
         if new_weight < old_weight:
             res_graph.remove_edges_from([a_b, c_d])
             res_graph.add_edge(a, c, weight=a_c_len)
@@ -84,13 +83,17 @@ def two_opt(graph: nx.Graph, res_graph: nx.DiGraph):
 
             res_graph.remove_edges_from([b_c])
 
-            improve += old_weight - new_weight
+            improve = old_weight - new_weight
+            # Возвращаем насколько улучшили путь
             return improve
-    return improve
+    # Если не нашли, возвращаем 0
+    return 0
 
+# Разворот двойных петель
 def vertex_opt(graph: nx.Graph, res_graph: nx.DiGraph):
-    improve = 0
-    for vertex in deepcopy(res_graph.nodes):
+    # Перебираем вершины выходного графа
+    for vertex in res_graph.nodes:
+        # Определяем вершины A, B, C, D, E, если их возможно определить
         c = vertex
         b_edges = list(res_graph.in_edges(c, data=True))
         d_edges = list(res_graph.out_edges(c, data=True))
@@ -110,13 +113,13 @@ def vertex_opt(graph: nx.Graph, res_graph: nx.DiGraph):
             e = d_e[1]
         else:
             continue
-        if graph.has_edge(a, d) and graph.has_edge(b, e):
-            a_d_len = graph.edges[a, d]['weight']
-            b_e_len = graph.edges[b, e]['weight']
-        else:
+        if not graph.has_edge(a, d) or not graph.has_edge(b, e):
             continue
+        a_d_len = graph.edges[a, d]['weight']
+        b_e_len = graph.edges[b, e]['weight']
         old_weight = a_b[2]['weight'] + d_e[2]['weight']
         new_weight = a_d_len + b_e_len
+        # Проверяем есть ли улучшения, если есть - изменяем решение
         if new_weight < old_weight:
             res_graph.remove_edges_from([a_b, d_e])
             res_graph.add_edge(a, d, weight=a_d_len)
@@ -125,6 +128,8 @@ def vertex_opt(graph: nx.Graph, res_graph: nx.DiGraph):
             res_graph.add_edge(b, e, weight=b_e_len)
 
             res_graph.remove_edges_from([b_c, c_d])
-            improve += old_weight - new_weight
+            # Возвращаем насколько улучшили решение
+            improve = old_weight - new_weight
             return improve
-    return improve
+    # Не улучшили - возвращаем 0
+    return 0

@@ -123,8 +123,6 @@ class MainWindow(QMainWindow):
         self.results_field.setText(nna_common.default_text)
         self.results_field.setReadOnly(True)
 
-        self.options_window = None
-
     # Достройка графа до полного
     def complete_graph(self):
         self.g_input.complete()
@@ -199,24 +197,31 @@ class MainWindow(QMainWindow):
             self.start_v_combo.addItem(str(event.vertex))
             return True
         return super().eventFilter(obj, event)
+    # Запуск оптимизаций
     def run_opt(self):
+        # Проверка есть ли решение
         if self.path_len == 0:
             nna_common.info('Нечего оптимизировать')
         else:
+            # Применяем первую оптимизацию
             improve = nna.two_opt(self.g_input.G, self.g_output.G)
             if improve:
+                # Если есть улучшения - изменяем картинку
                 self.path_len -= improve
                 self.g_output.clear_fig()
                 self.update_res()
                 print('improved 2-opt')
             else:
+                # Пытаемся применить вторую оптимизацию
                 improve = nna.vertex_opt(self.g_input.G, self.g_output.G)
                 if improve:
+                    # Если есть улучшения - изменяем картинку
                     self.path_len -= improve
                     self.g_output.clear_fig()
                     self.update_res()
                     print('improved v-opt')
                 else:
+                    # Сообщаем пользователю если оптимизация не удалась
                     nna_common.info('Оптимизация не удалась')
 
 
